@@ -1,0 +1,7 @@
+build/
+*.o
+*.autosave
+CMakeCache.txt
+CMakeFiles/
+*.user
+
