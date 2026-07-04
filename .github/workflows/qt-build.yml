@@ -1,0 +1,28 @@
+name: Qt C++ Build Check
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Kodları GitHub anbarından virtual serverə köçür
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Ubuntu serverinə Qt mühitini quraşdır
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.5.0' # Layihənizə uyğun Qt versiyası
+
+    # 3. QMake vasitəsilə layihəni hazırlayın və yığın (Build)
+    - name: Build Application
+      run: |
+        qmake
+        make
