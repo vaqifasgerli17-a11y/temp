@@ -1,0 +1,45 @@
+name: Qt6 QML LocalStorage Build Check
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Kodları götür
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # 2. Lazımi Linux qrafik paketlərini quraşdır
+    - name: Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake libgl1-mesa-dev libxkbcommon-dev libx11-xcb-dev libglu1-mesa-dev
+
+    # 3. Python mühitini qur
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    # 4. Qt6.5-i və lazımi modulları (SerialPort daxil) quraşdır
+    - name: Install Qt6 via aqtinstall
+      run: |
+        python -m pip install --upgrade pip
+        pip install aqtinstall
+        python -m aqt install-qt linux desktop 6.5.0 gcc_64 -m qtshadertools qt5compat serialport
+
+    # 5. Qt-nin harada olduğunu tapıb birbaşa CMake-ə veririk
+    - name: Configure CMake
+      run: |
+        QT_PATH=$(find /home/runner -name "Qt6Config.cmake" -exec dirname {} \; | head -n 1)
+        cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$QT_PATH/../../..
+
+    # 6. Proqramı yığ (Compile et)
+    - name: Build Application
+      run: cmake --build build
